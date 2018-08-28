@@ -2,11 +2,14 @@ package fcm
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"google.golang.org/appengine/urlfetch"
 )
 
 const (
@@ -99,7 +102,6 @@ func NewFcmClient(apiKey string) *FcmClient {
 
 // NewFcmTopicMsg sets the targeted token/topic and the data payload
 func (this *FcmClient) NewFcmTopicMsg(to string, body map[string]string) *FcmClient {
-
 	this.NewFcmMsgTo(to, body)
 
 	return this
@@ -115,7 +117,6 @@ func (this *FcmClient) NewFcmMsgTo(to string, body interface{}) *FcmClient {
 
 // SetMsgData sets data payload
 func (this *FcmClient) SetMsgData(body interface{}) *FcmClient {
-
 	this.Message.Data = body
 
 	return this
@@ -154,8 +155,7 @@ func (this *FcmClient) apiKeyHeader() string {
 }
 
 // sendOnce send a single request to fcm
-func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
-
+func (this *FcmClient) sendOnce(gaeCtx context.Context) (*FcmResponseStatus, error) {
 	fcmRespStatus := new(FcmResponseStatus)
 
 	jsonByte, err := this.Message.toJsonByte()
@@ -167,7 +167,7 @@ func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
 	request.Header.Set("Authorization", this.apiKeyHeader())
 	request.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{}
+	client := urlfetch.Client(gaeCtx)
 	response, err := client.Do(request)
 
 	if err != nil {
@@ -181,7 +181,6 @@ func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
 	}
 
 	fcmRespStatus.StatusCode = response.StatusCode
-
 	fcmRespStatus.RetryAfter = response.Header.Get(retry_after_header)
 
 	if response.StatusCode != 200 {
@@ -198,26 +197,21 @@ func (this *FcmClient) sendOnce() (*FcmResponseStatus, error) {
 }
 
 // Send to fcm
-func (this *FcmClient) Send() (*FcmResponseStatus, error) {
-	return this.sendOnce()
-
+func (this *FcmClient) Send(gaeCtx context.Context) (*FcmResponseStatus, error) {
+	return this.sendOnce(gaeCtx)
 }
 
 // toJsonByte converts FcmMsg to a json byte
 func (this *FcmMsg) toJsonByte() ([]byte, error) {
-
 	return json.Marshal(this)
-
 }
 
 // parseStatusBody parse FCM response body
 func (this *FcmResponseStatus) parseStatusBody(body []byte) error {
-
 	if err := json.Unmarshal([]byte(body), &this); err != nil {
 		return err
 	}
 	return nil
-
 }
 
 // SetPriority Sets the priority of the message.

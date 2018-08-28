@@ -1,12 +1,6 @@
 package fcm
 
-import (
-	"fmt"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-)
-
+/*
 func TestTopicHandle_1(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(topicHandle))
@@ -32,7 +26,6 @@ func TestTopicHandle_1(t *testing.T) {
 }
 
 func TestTopicHandle_2(t *testing.T) {
-
 	srv := httptest.NewServer(http.HandlerFunc(topicHandle))
 	chgUrl(srv)
 	defer srv.Close()
@@ -174,3 +167,4 @@ func regIdHandle(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, result)
 
 }
+*/
