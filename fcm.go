@@ -337,6 +337,23 @@ func (this *FcmResponseStatus) PrintResults() {
 	}
 }
 
+// PrintResults prints the FcmResponseStatus results for fast using and debugging
+func (this *FcmResponseStatus) ResultsToString() string {
+	str := fmt.Sprintln("Status Code   :", this.StatusCode)
+	str = str + fmt.Sprintln("Success       :", this.Success)
+	str = str + fmt.Sprintln("Fail          :", this.Fail)
+	str = str + fmt.Sprintln("Canonical_ids :", this.Canonical_ids)
+	str = str + fmt.Sprintln("Topic MsgId   :", this.MsgId)
+	str = str + fmt.Sprintln("Topic Err     :", this.Err)
+	for i, val := range this.Results {
+		str = str + fmt.Sprintf("Result(%d)> \n", i)
+		for k, v := range val {
+			str = str + fmt.Sprintln("\t", k, " : ", v)
+		}
+	}
+	return str
+}
+
 // IsTimeout check whether the response timeout based on http response status
 // code and if any error is retryable
 func (this *FcmResponseStatus) IsTimeout() bool {
